@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Главная{% endblock %}
+{% block content %}
+<div class="hero">
+    {% if user.is_authenticated %}
+        <h1>Привет, {{ user.username }}! 👋</h1>
+        <p class="hero-sub">Добро пожаловать в Отель</p>
+        <div class="user-card" style="margin: 1.5rem auto; display:inline-block;">
+            <div class="user-info">
+                <p><strong>Email:</strong> {{ user.email|default:"не указан" }}</p>
+                {% if user.phone %}<p><strong>Телефон:</strong> {{ user.phone }}</p>{% endif %}
+                <p><strong>Друзей:</strong> {{ user.friends.count }}</p>
+            </div>
+        </div>
+        <div class="actions">
+            <a href="{% url 'profile' username=user.username %}" class="btn btn-primary">👤 Мой профиль</a>
+        </div>
+    {% else %}
+        <h1>Добро пожаловать! 🎉</h1>
+        <p class="hero-sub">Войдите или создайте аккаунт чтобы начать</p>
+        <div class="actions">
+            <a href="{% url 'login' %}" class="btn btn-primary">Войти</a>
+            <a href="{% url 'register' %}" class="btn btn-outline">Регистрация</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
