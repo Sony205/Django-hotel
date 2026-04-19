@@ -1,4 +1,5 @@
 from django.db import models
+from .validators import real_number, real_email
 
 
 class Room(models.Model):
@@ -9,36 +10,39 @@ class Room(models.Model):
     ]
 
     number = models.CharField(
+        'Номер комнаты',
         max_length=10,
-        unique=True,
-        verbose_name='Номер комнаты'
+        unique=True
     )
     room_type = models.CharField(
+        'Тип комнаты',
         max_length=20,
         choices=ROOM_TYPE_CHOICES,
         default='standard',
-        verbose_name='Тип комнаты'
     )
     price_per_night = models.DecimalField(
+        'Цена за ночь',
         max_digits=10,
         decimal_places=2,
-        verbose_name='Цена за ночь'
     )
     capacity = models.PositiveIntegerField(
+        'Вместимость',
         default=1,
-        verbose_name='Вместимость'
     )
     description = models.TextField(
+        'Описание',
         blank=True,
-        verbose_name='Описание'
     )
     is_available = models.BooleanField(
-        default=True,
-        verbose_name='Доступен для бронирования'
+        'Доступен для бронирования',
+        default=True
     )
     created_at = models.DateTimeField(
+        'Дата создания',
         auto_now_add=True,
-        verbose_name='Создано'
+    )
+    images = models.ImageField(
+        default=None,
     )
 
     class Meta:
@@ -48,3 +52,74 @@ class Room(models.Model):
 
     def __str__(self):
         return f'Комната {self.number} ({self.get_room_type_display()})'
+
+
+class Account(models.Model):
+    first_name = models.CharField(
+        'Имя',
+        max_length=100,
+        blank=False,
+    )
+    last_name = models.CharField(
+        'Фамилия',
+        max_length=100,
+        blank=False
+    )
+
+
+class AccountInfo(models.Model):
+    account = models.OneToOneField(
+        Account,
+        on_delete=models.CASCADE,
+        related_name='info',
+        primary_key=True,
+        verbose_name='Аккаунт'
+    )
+    phone = phone = models.CharField(
+        'Номер телефона',
+        max_length=30,
+        blank=False,
+        unique=True,
+        validators=[real_number]
+    )
+    email = models.TextField(
+        'Почта',
+        blank=False,
+        unique=True,
+        validators=[real_email]
+    )
+
+
+class Booking(models.Model):
+    BOOKING_STATUS = [
+        ('sleeping', 'Ожидает'),
+        ('active', 'Активна'),
+        ('dead', 'Завершена'),
+    ]
+    client = models.ForeignKey(
+        Account,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        related_name="rooms",
+        verbose_name='Клиент'
+    )
+    booking_date = models.DateField(
+        'Дата начала брони',
+        blank=True
+    )
+    expiration_date = models.DateField(
+        'Дата окончания брони',
+        blank=None,
+        null=None,
+    )
+    status = models.CharField(
+        'Статус брони',
+        max_length=15,
+        choices=BOOKING_STATUS,
+        default='sleeping',
+    )
+    created_at = models.DateTimeField(
+        'Дата создания',
+        auto_now_add=True,
+    )
