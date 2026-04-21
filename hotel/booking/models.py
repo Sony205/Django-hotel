@@ -1,5 +1,6 @@
 from django.db import models
-from rooms.models import Account, Room
+from rooms.models import Room
+from users.models import CustomUser
 
 
 class Booking(models.Model):
@@ -9,7 +10,7 @@ class Booking(models.Model):
         ('dead', 'Завершена'),
     ]
     client = models.ForeignKey(
-        Account,
+        CustomUser,
         null=True,
         default=None,
         on_delete=models.SET_NULL,

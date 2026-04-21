@@ -1,5 +1,4 @@
 from django.db import models
-from .validators import real_number, real_email
 
 
 class Room(models.Model):
@@ -52,39 +51,3 @@ class Room(models.Model):
 
     def __str__(self):
         return f'Комната {self.number} ({self.get_room_type_display()})'
-
-
-class Account(models.Model):
-    first_name = models.CharField(
-        'Имя',
-        max_length=100,
-        blank=False,
-    )
-    last_name = models.CharField(
-        'Фамилия',
-        max_length=100,
-        blank=False
-    )
-
-
-class AccountInfo(models.Model):
-    account = models.OneToOneField(
-        Account,
-        on_delete=models.CASCADE,
-        related_name='info',
-        primary_key=True,
-        verbose_name='Аккаунт'
-    )
-    phone = phone = models.CharField(
-        'Номер телефона',
-        max_length=30,
-        blank=False,
-        unique=True,
-        validators=[real_number]
-    )
-    email = models.TextField(
-        'Почта',
-        blank=False,
-        unique=True,
-        validators=[real_email]
-    )
