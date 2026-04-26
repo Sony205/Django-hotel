@@ -16,7 +16,7 @@ def register(request):
             return redirect('profile')
     else:
         form = RegisterForm()
-    return render(request, 'register.html', {'form': form})
+    return render(request, 'registration/register.html', {'form': form})
 
 
 def user_login(request):
@@ -36,7 +36,7 @@ def user_login(request):
             messages.error(request, 'Ошибка в форме. Проверьте правильность ввода.')
     else:
         form = LoginForm()
-    return render(request, 'login.html', {'form': form})
+    return render(request, 'registration/login.html', {'form': form})
 
 
 def user_logout(request):
@@ -57,3 +57,10 @@ def profile(request):
         'user': request.user,
         'account_info': account_info,
     })
+
+def index(request):
+    return render(request, 'index.html')
+
+def rooms(request):
+    amenities = "Тапочки,Халат,Высокоскоростной Интернет,Затемнённые шторы,Зеркало,Письменный стол,Чайник или кофеварка,Бутилированная вода,Патио,Кондиционер,Отопление,Телефон,Собственная ванная комната".split(',')
+    return render(request, 'rooms.html', {'amenities': amenities})

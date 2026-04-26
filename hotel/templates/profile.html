@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Профиль — Django-Hotel{% endblock %}
+
+
+{% block content %}
+<div class="page-form">
+  <h1>Профиль</h1>
+
+  <div class="form-wrap">
+    <div class="field">
+      <label>Имя пользователя</label>
+      <input type="text" value="{{ user.username }}" readonly />
+    </div>
+    {% if account_info %}
+      <div class="field">
+        <label>Имя</label>
+        <input type="text" value="{{ account_info.first_name }}" readonly />
+      </div>
+      <div class="field">
+        <label>Фамилия</label>
+        <input type="text" value="{{ account_info.last_name }}" readonly />
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" value="{{ account_info.email }}" readonly />
+      </div>
+      <div class="field">
+        <label>Телефон</label>
+        <input type="tel" value="{{ account_info.phone }}" readonly />
+      </div>
+      {% if account_info.birthday %}
+        <div class="field">
+          <label>Дата рождения</label>
+          <input type="text" value="{{ account_info.birthday|date:'d.m.Y' }}" readonly />
+        </div>
+      {% endif %}
+    {% else %}
+      <p style="color: var(--muted); margin-bottom: 16px;">
+        Дополнительные данные профиля не заполнены.
+      </p>
+    {% endif %}
+
+    <a href="{% url 'logout' %}" class="btn-submit" style="text-align:center; text-decoration:none;">
+      Выйти
+    </a>
+  </div>
+</div>
+{% endblock %}

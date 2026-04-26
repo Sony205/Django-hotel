@@ -1,21 +1,55 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Вход</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-<h2>Вход</h2>
+{% block title %}Вход — Django-Hotel{% endblock %}
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Войти</button>
-</form>
+{% block content %}
+<a href="{% url 'home' %}" class="back-btn" title="Назад">&#8592;</a>
 
-<p>
-    <a href="{% url 'password_reset' %}">Забыли пароль?</a>
-</p>
+<div class="page-form">
+  <h1>Вход</h1>
 
-</body>
-</html>
+  <div class="form-wrap">
+
+    {% if form.non_field_errors %}
+      <div style="color:#c0392b; font-size:.88rem; margin-bottom:14px;">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'login' %}">
+      {% csrf_token %}
+
+      <div class="field">
+  <label for="{{ form.username.id_for_label }}">Имя пользователя</label>
+  <input type="text"
+         id="{{ form.username.id_for_label }}"
+         name="{{ form.username.name }}"
+         value="{{ form.username.value|default:'' }}"
+         autocomplete="username" />
+  {% if form.username.errors %}
+    <span style="color:#c0392b; font-size:.8rem;">{{ form.username.errors|join:', ' }}</span>
+  {% endif %}
+</div>
+
+      <div class="field">
+        <label for="id_password">Пароль</label>
+        <input
+          type="password"
+          id="id_password"
+          name="password"
+          autocomplete="current-password"
+        />
+        {% if form.password.errors %}
+          <span style="color:#c0392b; font-size:.8rem;">{{ form.password.errors|join:', ' }}</span>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="btn-submit">Вход</button>
+    </form>
+
+    <!-- Замените href на реальный url восстановления пароля -->
+    <a href="password_reset_complete.html" class="link-muted">Забыли пароль?</a>
+
+  </div>
+</div>
+{% endblock %}
