@@ -25,7 +25,7 @@ class AccountInfo(models.Model):
         primary_key=True,
         verbose_name='Аккаунт'
     )
-    phone = phone = models.CharField(
+    phone = models.CharField(
         'Номер телефона',
         max_length=30,
         blank=False,
