@@ -16,7 +16,7 @@ def register(request):
             return redirect('profile')
     else:
         form = RegisterForm()
-    return render(request, 'register.html', {'form': form})
+    return render(request, 'registration/register.html', {'form': form})
 
 
 def user_login(request):
@@ -36,7 +36,7 @@ def user_login(request):
             messages.error(request, 'Ошибка в форме. Проверьте правильность ввода.')
     else:
         form = LoginForm()
-    return render(request, 'login.html', {'form': form})
+    return render(request, 'registration/login.html', {'form': form})
 
 
 def user_logout(request):
