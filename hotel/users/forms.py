@@ -18,12 +18,26 @@ class RegisterForm(UserCreationForm):
             if hasattr(field.widget, 'attrs'):
                 field.widget.attrs['class'] = 'form-control'
 
+    def clean_email(self):
+        """Проверка, что email не используется"""
+        email = self.cleaned_data.get('email')
+        if AccountInfo.objects.filter(email=email).exists():
+            raise forms.ValidationError('Этот email уже зарегистрирован')
+        return email
+
+    def clean_phone(self):
+        """Проверка, что телефон не используется"""
+        phone = self.cleaned_data.get('phone')
+        if AccountInfo.objects.filter(phone=phone).exists():
+            raise forms.ValidationError('Этот номер телефона уже зарегистрирован')
+        return phone
+
     def save(self, commit=True):
         user = super().save(commit=commit)
         AccountInfo.objects.create(
             account=user,
-            first_name=self.cleaned_data['first_name'],
-            last_name=self.cleaned_data['last_name'],
+            first_name=self.cleaned_data.get('first_name', ''),
+            last_name=self.cleaned_data.get('last_name', ''),
             phone=self.cleaned_data['phone'],
             email=self.cleaned_data['email'],
             birthday=self.cleaned_data.get('birthday'),
