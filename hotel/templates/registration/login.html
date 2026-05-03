@@ -48,7 +48,11 @@
     </form>
 
     <!-- Замените href на реальный url восстановления пароля -->
-    <a href="password_reset_complete.html" class="link-muted">Забыли пароль?</a>
+    <a href="{% url 'password_reset' %}" class="link-muted">Забыли пароль?</a>
+    <a href="{% url 'register' %}" class="link-muted" style="margin-top:8px;">
+      Нет аккаунта? Зарегистрироваться
+    </a>
+ 
 
   </div>
 </div>
