@@ -1,0 +1,426 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Комнаты — Django-Hotel{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ── PAGE ── */
+  .rooms-page {
+    max-width: 960px;
+    margin: 48px auto 72px;
+    padding: 0 32px;
+  }
+
+  .rooms-page h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 36px;
+    animation: fadeUp .5s ease both;
+  }
+
+  /* ── ROOM CARD ── */
+  .room-card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,.07);
+    margin-bottom: 40px;
+    animation: fadeUp .6s ease both;
+    transition: box-shadow .25s;
+  }
+  .room-card:hover { box-shadow: 0 8px 36px rgba(91,91,214,.13); }
+
+  /* ── GALLERY ── */
+  .gallery {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr;
+    grid-template-rows: 200px 200px;
+    gap: 4px;
+    background: #eee;
+    border-radius: 16px 16px 0 0;
+    overflow: hidden;
+  }
+
+  .gallery .main-img {
+    grid-row: 1 / 3;
+    position: relative;
+  }
+
+  .gallery img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Бейдж "Остался 1 номер" */
+  .badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: #e74c3c;
+    color: #fff;
+    font-size: .78rem;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 20px;
+    z-index: 2;
+    letter-spacing: .02em;
+  }
+
+  /* Кнопка прокрутки (если нет лишних фото — скрыта) */
+  .gallery-nav {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,.92);
+    border: none;
+    border-radius: 50%;
+    width: 36px; height: 36px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,.15);
+    z-index: 3;
+    transition: background .2s;
+  }
+  .gallery-nav:hover { background: #fff; }
+
+  /* ── ROOM INFO ── */
+  .room-info {
+    padding: 22px 26px 26px;
+  }
+
+  .room-info h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  .room-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .9rem;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .room-meta svg { flex-shrink: 0; }
+
+  /* Удобства */
+  .amenities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 0;
+    font-size: .84rem;
+    color: var(--muted);
+    margin-bottom: 18px;
+  }
+
+  .amenities span { white-space: nowrap; }
+  .amenities span:not(:last-child)::after { content: ' •'; margin: 0 6px; color: #ccc; }
+
+  .amenities-toggle {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-family: 'Raleway', sans-serif;
+    font-size: .84rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    transition: opacity .2s;
+  }
+  .amenities-toggle:hover { opacity: .75; }
+
+  /* Полный список удобств (скрыт по умолчанию) */
+  .amenities-full {
+    display: none;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0 18px;
+  }
+  .amenities-full.open { display: flex; }
+
+  .amenity-tag {
+    background: var(--input-bg);
+    color: var(--text);
+    font-size: .8rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+
+  /* Нижняя строка — цена и кнопка */
+  .room-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid #f0f0f0;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .room-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .room-price span {
+    font-family: 'Raleway', sans-serif;
+    font-size: .82rem;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  .btn-book {
+    display: inline-block;
+    padding: 10px 28px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Raleway', sans-serif;
+    font-size: .92rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity .2s, transform .15s;
+  }
+  .btn-book:hover { opacity: .88; transform: translateY(-1px); }
+
+  @media (max-width: 640px) {
+    .gallery { grid-template-columns: 1fr 1fr; grid-template-rows: 160px 160px; }
+    .gallery .main-img { grid-column: 1 / 3; grid-row: 1 / 2; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="rooms-page">
+  <h1>Доступные номера</h1>
+
+  {% for room in rooms %}
+  <div class="room-card">
+
+    <!-- ГАЛЕРЕЯ -->
+    <div class="gallery">
+      {% if room.available_count == 1 %}
+        <div class="badge">Остался 1 номер</div>
+      {% endif %}
+
+      <div class="main-img">
+        {% if room.images.all %}
+          <img src="{{ room.images.first.image.url }}" alt="{{ room.name }}"/>
+        {% else %}
+          <img src="{% static 'images/room-placeholder.jpg' %}" alt="{{ room.name }}"/>
+        {% endif %}
+      </div>
+
+      {% for img in room.images.all|slice:"1:4" %}
+        <div><img src="{{ img.image.url }}" alt="{{ room.name }}"/></div>
+      {% endfor %}
+    </div>
+
+    <!-- ИНФОРМАЦИЯ -->
+    <div class="room-info">
+      <h2>{{ room.name }}</h2>
+
+      <div class="room-meta">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        {{ room.capacity }} человек · {{ room.bed_type }}
+      </div>
+
+      <!-- Короткий список удобств -->
+      <div class="amenities">
+        {% for amenity in room.amenities_list|slice:":7" %}
+          <span>{{ amenity }}</span>
+        {% endfor %}
+        {% if room.amenities_list|length > 7 %}
+          <button class="amenities-toggle" onclick="toggleAmenities(this)">Все удобства номера</button>
+        {% endif %}
+      </div>
+
+      <!-- Полный список (скрыт) -->
+      <div class="amenities-full">
+        {% for amenity in room.amenities_list %}
+          <span class="amenity-tag">{{ amenity }}</span>
+        {% endfor %}
+      </div>
+
+      <div class="room-footer">
+        <div class="room-price">
+          {{ room.price }} ₽ <span>/ ночь</span>
+        </div>
+        <a href="{% url 'room_detail' room.pk %}" class="btn-book">Забронировать</a>
+      </div>
+    </div>
+
+  </div>
+  {% empty %}
+
+  <!-- ══ СТАТИЧНЫЕ КАРТОЧКИ (пока нет данных из БД) ══ -->
+
+  <!-- Карточка 1 -->
+  <div class="room-card">
+    <div class="gallery">
+      <div class="badge">Остался 1 номер</div>
+      <div class="main-img">
+        {# Замените на {% static 'images/room1_main.jpg' %} #}
+        <img src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80" alt="Стандарт"/>
+      </div>
+      <div><img src="https://images.unsplash.com/photo-1615874959474-d609969a20ed?w=400&q=80" alt=""/></div>
+      <div><img src="https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=400&q=80" alt=""/></div>
+      <div><img src="https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=400&q=80" alt=""/></div>
+      <div><img src="https://images.unsplash.com/photo-1620626011761-996317702149?w=400&q=80" alt=""/></div>
+    </div>
+    <div class="room-info">
+      <h2>Двухместный номер без балкона Standard</h2>
+      <div class="room-meta">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        2 человека · 1 двуспальная кровать или 2 односпальные
+      </div>
+      <div class="amenities">
+        <span>Телевизор</span><span>Фен</span><span>Шкаф</span>
+        <span>Сейф</span><span>Туалетные принадлежности</span>
+        <span>Душ</span><span>Постельное бельё</span>
+        <button class="amenities-toggle" onclick="toggleAmenities(this)">Все удобства номера</button>
+      </div>
+      <div class="amenities-full">
+        {% for a in amenities %}
+        <span class="amenity-tag">{{ a }}</span>
+        {% endfor %}
+      </div>
+      <div class="room-footer">
+        <div class="room-price">4 500 ₽ <span>/ ночь</span></div>
+        {# Замените на {% url 'room_detail' 1 %} #}
+        <a href="#" class="btn-book">Забронировать</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Карточка 2 -->
+  <div class="room-card">
+    <div class="gallery">
+      <div class="main-img">
+        <img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800&q=80" alt="Комфорт"/>
+      </div>
+      <div><img src="https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=400&q=80" alt=""/></div>
+      <div><img src="https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=400&q=80" alt=""/></div>
+      <div><img src="https://images.unsplash.com/photo-1584622781867-1c5fe959b76e?w=400&q=80" alt=""/></div>
+      <div><img src="https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=400&q=80" alt=""/></div>
+    </div>
+    <div class="room-info">
+      <h2>Номер «Комфорт» с видом на город</h2>
+      <div class="room-meta">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        2 человека · 1 двуспальная кровать
+      </div>
+      <div class="amenities">
+        <span>Телевизор</span><span>Кондиционер</span><span>Мини-бар</span>
+        <span>Сейф</span><span>Халат и тапочки</span>
+        <span>Ванная комната</span><span>Фен</span>
+        <button class="amenities-toggle" onclick="toggleAmenities(this)">Все удобства номера</button>
+      </div>
+      <div class="amenities-full">
+        <span class="amenity-tag">Телевизор</span>
+        <span class="amenity-tag">Кондиционер</span>
+        <span class="amenity-tag">Мини-бар</span>
+        <span class="amenity-tag">Сейф</span>
+        <span class="amenity-tag">Халат</span>
+        <span class="amenity-tag">Тапочки</span>
+        <span class="amenity-tag">Ванная комната</span>
+        <span class="amenity-tag">Фен</span>
+        <span class="amenity-tag">Письменный стол</span>
+        <span class="amenity-tag">Высокоскоростной Интернет</span>
+        <span class="amenity-tag">Панорамные окна</span>
+        <span class="amenity-tag">Чайник</span>
+      </div>
+      <div class="room-footer">
+        <div class="room-price">6 800 ₽ <span>/ ночь</span></div>
+        <a href="#" class="btn-book">Забронировать</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Карточка 3 -->
+  <div class="room-card">
+    <div class="gallery">
+      <div class="main-img">
+        <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&q=80" alt="Люкс"/>
+      </div>
+      <div><img src="https://images.unsplash.com/photo-1591088398332-8a7791972843?w=400&q=80" alt=""/></div>
+      <div><img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?w=400&q=80" alt=""/></div>
+      <div><img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&q=80" alt=""/></div>
+      <div><img src="https://images.unsplash.com/photo-1560347876-aeef00ee58a1?w=400&q=80" alt=""/></div>
+    </div>
+    <div class="room-info">
+      <h2>Люкс с панорамным видом</h2>
+      <div class="room-meta">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        2–4 человека · Двуспальная кровать King-size
+      </div>
+      <div class="amenities">
+        <span>Гостиная зона</span><span>Джакузи</span><span>Мини-кухня</span>
+        <span>Кондиционер</span><span>Сейф</span>
+        <span>Халат и тапочки</span><span>Мини-бар</span>
+        <button class="amenities-toggle" onclick="toggleAmenities(this)">Все удобства номера</button>
+      </div>
+      <div class="amenities-full">
+        <span class="amenity-tag">Гостиная зона</span>
+        <span class="amenity-tag">Джакузи</span>
+        <span class="amenity-tag">Мини-кухня</span>
+        <span class="amenity-tag">Кондиционер</span>
+        <span class="amenity-tag">Сейф</span>
+        <span class="amenity-tag">Халат</span>
+        <span class="amenity-tag">Тапочки</span>
+        <span class="amenity-tag">Мини-бар</span>
+        <span class="amenity-tag">Панорамные окна</span>
+        <span class="amenity-tag">Smart TV</span>
+        <span class="amenity-tag">Высокоскоростной Интернет</span>
+        <span class="amenity-tag">Балкон</span>
+        <span class="amenity-tag">Чайник и кофемашина</span>
+      </div>
+      <div class="room-footer">
+        <div class="room-price">14 000 ₽ <span>/ ночь</span></div>
+        <a href="#" class="btn-book">Забронировать</a>
+      </div>
+    </div>
+  </div>
+
+  {% endfor %}
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function toggleAmenities(btn) {
+    const card = btn.closest('.room-info');
+    const full = card.querySelector('.amenities-full');
+    const isOpen = full.classList.toggle('open');
+    btn.textContent = isOpen ? 'Скрыть' : 'Все удобства номера';
+  }
+</script>
+{% endblock %}

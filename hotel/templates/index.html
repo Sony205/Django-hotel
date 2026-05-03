@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Главная — Django-Hotel{% endblock %}
+
+{% block extra_head %}
+{% load static %}
+<style>
+  /* ── HERO ── */
+  .hero {
+    max-width: 900px;
+    margin: 56px auto 0;
+    padding: 0 32px;
+    animation: fadeUp .7s ease both;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 20px;
+  }
+
+  .hero p {
+    font-size: 1rem;
+    color: var(--muted);
+    max-width: 640px;
+    margin-bottom: 6px;
+  }
+
+  .hero ul {
+    list-style: none;
+    margin: 16px 0 36px;
+  }
+
+  .hero ul li {
+    position: relative;
+    padding-left: 18px;
+    color: var(--muted);
+    font-size: .95rem;
+    margin-bottom: 6px;
+  }
+
+  .hero ul li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+
+  /* ── HOTEL IMAGE ── */
+  .hotel-img-wrap {
+    max-width: 900px;
+    margin: 48px auto;
+    padding: 0 32px;
+    animation: fadeUp .9s ease .15s both;
+  }
+
+  .hotel-img-wrap img {
+    width: 100%;
+    height: 380px;
+    object-fit: cover;
+    border-radius: 16px;
+    display: block;
+    box-shadow: 0 8px 40px rgba(0,0,0,.13);
+  }
+
+  /* ── REVIEWS ── */
+  .reviews-section {
+    max-width: 900px;
+    margin: 0 auto 72px;
+    padding: 0 32px;
+    animation: fadeUp 1s ease .25s both;
+  }
+
+  .reviews-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 26px;
+  }
+
+  .reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  @media (max-width: 640px) {
+    .reviews-grid { grid-template-columns: 1fr; }
+  }
+
+  .review-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 22px 20px 18px;
+    box-shadow: 0 2px 18px rgba(0,0,0,.06);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .review-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 28px rgba(91,91,214,.13);
+  }
+
+  .review-text {
+    font-size: .9rem;
+    font-style: italic;
+    margin-bottom: 16px;
+    min-height: 44px;
+  }
+
+  .reviewer { display: flex; align-items: center; gap: 10px; }
+
+  .avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--input-bg);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .reviewer-info .name { font-weight: 600; font-size: .88rem; }
+  .reviewer-info .desc { font-size: .78rem; color: var(--muted); }
+</style>
+{% endblock %}
+
+{% block content %}
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h1>Добро Пожаловать в<br>Django-Hotel</h1>
+    <p>Это место, где комфорт встречается с гостеприимством. Мы создали это пространство для тех, кто ценит своё время и хочет получить максимум впечатлений от поездки.</p>
+    <p>Независимо от того, приехали ли вы в командировку или за новыми эмоциями, наши номера станут вашей тихой гаванью. У нас вы найдёте:</p>
+    <ul>
+      <li>Комфортабельные номера: от уютных «Стандарт» до роскошных люксов с панорамным видом.</li>
+      <li>Сервис 24/7: мы всегда рядом, чтобы решить любой вопрос.</li>
+      <li>Вкусную кухню: начните утро с нашего фирменного завтрака «шведский стол» или закажите ужин в номер.</li>
+    </ul>
+    <a href="{% url 'rooms' %}" class="btn btn-solid">Посмотреть номера</a>
+  </section>
+
+<div class="hotel-img-wrap">
+    <img
+    src="{% static 'image/index.jpeg' %}" alt="Django-Hotel"
+    />
+  </div>
+
+  <!-- REVIEWS -->
+  <section class="reviews-section">
+    <h2>Отзывы</h2>
+    <div class="reviews-grid">
+
+      {% for review in reviews %}
+      <div class="review-card">
+        <p class="review-text">"{{ review.text }}"</p>
+        <div class="reviewer">
+          <div class="avatar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5b5bd6" stroke-width="1.8">
+              <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+          </div>
+          <div class="reviewer-info">
+            <div class="name">{{ review.author }}</div>
+            <div class="desc">{{ review.description }}</div>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <!-- Статичные карточки если отзывов в БД нет -->
+      <div class="review-card">
+        <p class="review-text">"Замечательный отель, персонал очень внимательный и приветливый!"</p>
+        <div class="reviewer">
+          <div class="avatar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5b5bd6" stroke-width="1.8">
+              <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+          </div>
+          <div class="reviewer-info">
+            <div class="name">Анна К.</div>
+            <div class="desc">Постоянный гость</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card">
+        <p class="review-text">"Лучший отдых за последние годы. Всё на высшем уровне, рекомендую!"</p>
+        <div class="reviewer">
+          <div class="avatar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5b5bd6" stroke-width="1.8">
+              <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+          </div>
+          <div class="reviewer-info">
+            <div class="name">Игорь М.</div>
+            <div class="desc">Деловая поездка</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card">
+        <p class="review-text">"Номера чистые, кухня вкусная. Обязательно вернусь сюда снова!"</p>
+        <div class="reviewer">
+          <div class="avatar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5b5bd6" stroke-width="1.8">
+              <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+          </div>
+          <div class="reviewer-info">
+            <div class="name">Мария Л.</div>
+            <div class="desc">Семейный отдых</div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+    </div>
+  </section>
+
+</main>
+{% endblock %}

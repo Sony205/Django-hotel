@@ -1,39 +1,310 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Мой сайт{% endblock %}</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Django-Hotel{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #5b5bd6;
+      --bg: #f9f8f6;
+      --text: #1a1a2e;
+      --muted: #6b6b8a;
+      --nav-bg: #ebebf8;
+      --footer-bg: #2a2a3e;
+      --footer-text: #c8c8e0;
+      --input-bg: #e2e2ee;
+      --radius: 10px;
+    }
+
+    body {
+      font-family: 'Raleway', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--nav-bg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(91,91,214,.10);
+    }
+
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-links a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: .9rem;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: var(--radius);
+      transition: background .2s;
+    }
+    .nav-links a:hover { background: rgba(91,91,214,.12); }
+
+    .btn {
+      display: inline-block;
+      padding: 8px 18px;
+      border-radius: var(--radius);
+      font-family: 'Raleway', sans-serif;
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity .2s, transform .15s;
+    }
+    .btn:hover { opacity: .88; transform: translateY(-1px); }
+    .btn-solid  { background: var(--accent); color: #fff; border: none; }
+    .btn-outline { background: transparent; color: var(--accent); border: 2px solid var(--accent); }
+    .btn-dark   { background: var(--text); color: #fff; border: none; }
+
+    /* ── MAIN CONTENT AREA ── */
+    main { flex: 1; }
+
+    /* ── BACK BUTTON ── */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: var(--input-bg);
+      color: var(--text);
+      text-decoration: none;
+      margin: 18px 32px 0;
+      font-size: 1rem;
+      transition: background .2s;
+    }
+    .back-btn:hover { background: #d0d0e8; }
+
+    /* ── FORM STYLES (shared by login & register) ── */
+    .page-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 16px 48px;
+    }
+
+    .page-form h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 26px;
+      animation: fadeUp .5s ease both;
+    }
+
+    .form-wrap {
+      width: 100%;
+      max-width: 360px;
+      animation: fadeUp .6s ease .1s both;
+    }
+
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: .87rem; margin-bottom: 5px; }
+    .field input {
+      width: 100%;
+      padding: 9px 13px;
+      background: var(--input-bg);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      font-family: 'Raleway', sans-serif;
+      font-size: .91rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s, background .2s;
+    }
+    .field input:focus { border-color: var(--accent); background: #fff; }
+
+    .btn-submit {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background: var(--text);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'Raleway', sans-serif;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity .2s, transform .15s;
+    }
+    .btn-submit:hover { opacity: .85; transform: translateY(-1px); }
+
+    .link-muted {
+      display: block;
+      text-align: center;
+      margin-top: 14px;
+      font-size: .88rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .2s;
+    }
+    .link-muted:hover { color: var(--accent); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--footer-bg);
+      color: var(--footer-text);
+      padding: 40px 40px 28px;
+      margin-top: auto;
+    }
+
+    .footer-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr 1fr;
+      gap: 30px;
+    }
+
+    .footer-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      color: #fff;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .social-icons { display: flex; gap: 14px; margin-top: 4px; }
+    .social-icons a {
+      color: var(--footer-text);
+      text-decoration: none;
+      font-size: .82rem;
+      font-weight: 600;
+      letter-spacing: .03em;
+      transition: color .2s;
+    }
+    .social-icons a:hover { color: #fff; }
+
+    .footer-col h4 {
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+
+    .footer-col a {
+      display: block;
+      font-size: .83rem;
+      color: var(--footer-text);
+      text-decoration: none;
+      margin-bottom: 7px;
+      transition: color .2s;
+    }
+    .footer-col a:hover { color: #fff; }
+
+    .footer-bottom {
+      max-width: 900px;
+      margin: 24px auto 0;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,.1);
+      font-size: .76rem;
+      color: rgba(200,200,224,.45);
+      text-align: center;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 640px) {
+      nav { padding: 0 18px; }
+      .footer-inner { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-brand">
-            <a href="{% url 'home' %}">🏠 Отель</a>
-        </div>
-        <div class="nav-links">
-            {% if user.is_authenticated %}
-                <a href="{% url 'profile' username=user.username %}" class="nav-link">👤 {{ user.username }}</a>
-                <a href="{% url 'password_change' %}" class="btn btn-outline">🔑 Пароль</a>
-                <form method="post" action="{% url 'logout' %}" style="display:inline">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Выйти</button>
-                </form>
-            {% else %}
-                <a href="{% url 'login' %}" class="btn btn-outline">Войти</a>
-                <a href="{% url 'register' %}" class="btn btn-primary">Регистрация</a>
-            {% endif %}
-        </div>
-    </nav>
 
-    <div class="container">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-        {% block content %}{% endblock %}
+  <!-- ═══════════════ ШАПКА ═══════════════ -->
+  <nav>
+    <a href="{% url 'home' %}" class="nav-logo">Django-Hotel</a>
+    <div class="nav-links">
+      {% if user.is_authenticated %}
+        <a href="{% url 'profile' %}">Профиль</a>
+        <a href="{% url 'rooms' %}">Комнаты</a>
+        <a href="{% url 'logout' %}" class="btn btn-solid">Выйти</a>
+      {% else %}
+        <a href="{% url 'rooms' %}">Комнаты</a>
+        <a href="{% url 'login' %}" class="btn btn-solid">Вход</a>
+        <a href="{% url 'register' %}" class="btn btn-outline">Регистрация</a>
+      {% endif %}
     </div>
+  </nav>
+  <!-- ════════════════════════════════════ -->
+
+  <!-- Контент страницы -->
+  {% block content %}{% endblock %}
+
+  <!-- ═══════════════ ФУТЕР ═══════════════ -->
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">Django-hotel</div>
+        <div class="social-icons">
+          <!-- Замените href на реальные ссылки -->
+          <a href="#" title="Instagram">IG</a>
+          <a href="#" title="LinkedIn">LN</a>
+          <a href="#" title="YouTube">YT</a>
+          <a href="#" title="TikTok">TK</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Topic</h4>
+        <!-- Замените href и текст на реальные страницы -->
+        <a href="#">Page</a>
+        <a href="#">Page</a>
+        <a href="#">Page</a>
+      </div>
+      <div class="footer-col">
+        <h4>Topic</h4>
+        <a href="#">Page</a>
+        <a href="#">Page</a>
+        <a href="#">Page</a>
+      </div>
+      <div class="footer-col">
+        <h4>Topic</h4>
+        <a href="#">Page</a>
+        <a href="#">Page</a>
+        <a href="#">Page</a>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 Django-Hotel. Все права защищены.</div>
+  </footer>
+  <!-- ════════════════════════════════════ -->
+
+  {% block extra_scripts %}{% endblock %}
 </body>
 </html>
