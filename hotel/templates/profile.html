@@ -40,6 +40,9 @@
         Дополнительные данные профиля не заполнены.
       </p>
     {% endif %}
+    <a href="{% url 'password_change' %}" class="btn-submit" style="text-align:center; text-decoration:none;">
+      изменить пароль
+    </a>
 
     <a href="{% url 'logout' %}" class="btn-submit" style="text-align:center; text-decoration:none;">
       Выйти
