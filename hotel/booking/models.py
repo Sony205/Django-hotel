@@ -3,6 +3,21 @@ from rooms.models import Room
 from users.models import CustomUser
 
 
+class Services(models.Model):
+    name = models.CharField(
+        'Название услуги',
+        max_length=100,
+        null=False,
+        unique=True
+    )
+    cost = models.IntegerField(
+        'Стоимость',
+        max_length=20,
+        null=False,
+        default=0
+    )
+
+
 class Booking(models.Model):
     BOOKING_STATUS = [
         ('sleeping', 'Ожидает'),
@@ -14,15 +29,20 @@ class Booking(models.Model):
         null=True,
         default=None,
         on_delete=models.SET_NULL,
-        related_name="rooms",
+        related_name="client",
         verbose_name='Клиент'
     )
     room = models.ForeignKey(
         Room,
         null=False,
         on_delete=models.CASCADE,
-        related_name="client",
+        related_name="room",
         verbose_name="Комната"
+    )
+    servises = models.ManyToManyField(
+        Services,
+        related_name="services",
+        verbose_name="Услуги"
     )
     booking_date = models.DateField(
         'Дата начала брони',
