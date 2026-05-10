@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}Мои бронирования — Django-Hotel{% endblock %}
+
+{% block extra_head %}
+<style>
+  .bookings-page {
+    max-width: 860px;
+    margin: 44px auto 72px;
+    padding: 0 32px;
+    animation: fadeUp .5s ease both;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .page-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem;
+    font-weight: 700;
+  }
+
+  /* Карточка брони */
+  .booking-card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 3px 18px rgba(0,0,0,.06);
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: box-shadow .2s;
+  }
+  .booking-card:hover { box-shadow: 0 6px 28px rgba(91,91,214,.11); }
+
+  .booking-card-body {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    padding: 22px 24px;
+    align-items: start;
+  }
+
+  @media (max-width: 560px) {
+    .booking-card-body { grid-template-columns: 1fr; }
+  }
+
+  .booking-room {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .booking-dates {
+    font-size: .85rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .booking-dates svg { flex-shrink: 0; }
+
+  .booking-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: .82rem;
+    color: var(--muted);
+  }
+
+  .booking-meta span { display: flex; align-items: center; gap: 4px; }
+
+  /* Статус */
+  .status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .status-sleeping { background: #fef9e7; color: #d4a017; }
+  .status-active   { background: #e8f8f0; color: #1e7e4a; }
+  .status-dead     { background: #f4f4f4; color: #999; }
+
+  .booking-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+  }
+
+  .btn-cancel {
+    background: none;
+    border: 1.5px solid #e74c3c;
+    color: #e74c3c;
+    font-family: 'Raleway', sans-serif;
+    font-size: .82rem;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background .2s, color .2s;
+    white-space: nowrap;
+  }
+  .btn-cancel:hover { background: #e74c3c; color: #fff; }
+
+  /* Цена */
+  .booking-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text);
+    text-align: right;
+  }
+
+  .booking-price small {
+    font-family: 'Raleway', sans-serif;
+    font-size: .75rem;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  /* Пустое состояние */
+  .empty-state {
+    text-align: center;
+    padding: 64px 20px;
+    color: var(--muted);
+  }
+
+  .empty-state svg { margin-bottom: 16px; opacity: .35; }
+
+  .empty-state p { font-size: .95rem; margin-bottom: 24px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bookings-page">
+
+  <div class="page-header">
+    <h1>Мои бронирования</h1>
+    <a href="{% url 'room_list' %}" class="btn btn-solid">+ Забронировать номер</a>
+  </div>
+
+  {% if bookings %}
+    {% for booking in bookings %}
+    <div class="booking-card">
+      <div class="booking-card-body">
+
+        <div>
+          <div class="booking-room">{{ booking.room }}</div>
+
+          <div class="booking-dates">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            {{ booking.booking_date|date:"d.m.Y" }} — {{ booking.expiration_date|date:"d.m.Y" }}
+          </div>
+
+          <div class="booking-meta">
+            <span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+              </svg>
+              {{ booking.room.capacity }} чел.
+            </span>
+            <span>
+              Тип: {{ booking.room.get_room_type_display }}
+            </span>
+            <span>
+              Создано: {{ booking.created_at|date:"d.m.Y" }}
+            </span>
+          </div>
+        </div>
+
+        <div class="booking-actions">
+          <!-- Статус -->
+          <span class="status-badge status-{{ booking.status }}">
+            {{ booking.get_status_display }}
+          </span>
+
+          <!-- Цена -->
+          <div class="booking-price">
+            {{ booking.room.price_per_night }} ₽
+            <small>/ ночь</small>
+          </div>
+
+          <!-- Кнопка отмены только для активных/ожидающих -->
+          {% if booking.status != 'dead' %}
+            <form method="post" action="{% url 'cancel_booking' booking.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn-cancel"
+                      onclick="return confirm('Отменить бронирование?')">
+                Отменить
+              </button>
+            </form>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+
+  {% else %}
+    <div class="empty-state">
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.3">
+        <rect x="3" y="4" width="18" height="18" rx="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      <p>У вас пока нет бронирований.</p>
+      <a href="{% url 'room_list' %}" class="btn btn-solid">Посмотреть номера</a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

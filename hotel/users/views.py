@@ -60,7 +60,3 @@ def profile(request):
 
 def index(request):
     return render(request, 'index.html')
-
-def rooms(request):
-    amenities = "Тапочки,Халат,Высокоскоростной Интернет,Затемнённые шторы,Зеркало,Письменный стол,Чайник или кофеварка,Бутилированная вода,Патио,Кондиционер,Отопление,Телефон,Собственная ванная комната".split(',')
-    return render(request, 'rooms.html', {'amenities': amenities})

@@ -254,10 +254,10 @@
     <div class="nav-links">
       {% if user.is_authenticated %}
         <a href="{% url 'profile' %}">Профиль</a>
-        <a href="{% url 'rooms' %}">Комнаты</a>
+        <a href="{% url 'room_list' %}">Комнаты</a>
         <a href="{% url 'logout' %}" class="btn btn-solid">Выйти</a>
       {% else %}
-        <a href="{% url 'rooms' %}">Комнаты</a>
+        <a href="{% url 'room_list' %}">Комнаты</a>
         <a href="{% url 'login' %}" class="btn btn-solid">Вход</a>
         <a href="{% url 'register' %}" class="btn btn-outline">Регистрация</a>
       {% endif %}

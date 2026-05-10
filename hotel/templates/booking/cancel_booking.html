@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Отмена бронирования — Django-Hotel{% endblock %}
+
+{% block content %}
+<a href="{% url 'my_bookings' %}" class="back-btn" title="Назад">&#8592;</a>
+
+<div class="page-form">
+  <div class="form-wrap" style="text-align:center;">
+
+    <!-- Иконка предупреждения -->
+    <div style="margin-bottom:20px;">
+      <svg width="54" height="54" viewBox="0 0 24 24" fill="none"
+           stroke="#e74c3c" stroke-width="1.4" style="display:inline-block;">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    </div>
+
+    <h1 style="margin-bottom:14px;">Отмена бронирования</h1>
+
+    <!-- Информация о брони -->
+    <div style="
+      background: var(--nav-bg);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 22px;
+      text-align: left;
+    ">
+      <div style="font-family:'Playfair Display',serif; font-size:1rem; font-weight:700; margin-bottom:8px;">
+        {{ booking.room }}
+      </div>
+      <div style="font-size:.85rem; color:var(--muted); display:flex; align-items:center; gap:6px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        {{ booking.booking_date|date:"d.m.Y" }} — {{ booking.expiration_date|date:"d.m.Y" }}
+      </div>
+      <div style="margin-top:8px; font-size:.82rem; color:var(--muted);">
+        Статус: <strong style="color:var(--text);">{{ booking.get_status_display }}</strong>
+      </div>
+    </div>
+
+    <p style="font-size:.88rem; color:var(--muted); line-height:1.6; margin-bottom:28px;">
+      Вы уверены, что хотите отменить бронирование?<br>
+      Это действие нельзя отменить.
+    </p>
+
+    <form method="post" style="display:inline-flex; flex-direction:column; gap:10px; width:100%;">
+      {% csrf_token %}
+      <button type="submit" style="
+        display: block; width: 100%; padding: 11px;
+        background: #e74c3c; color: #fff;
+        border: none; border-radius: var(--radius);
+        font-family: 'Raleway', sans-serif;
+        font-size: .95rem; font-weight: 700;
+        cursor: pointer; transition: opacity .2s;
+      ">Да, отменить бронирование</button>
+    </form>
+
+    <a href="{% url 'my_bookings' %}" class="link-muted" style="margin-top:12px;">
+      Нет, вернуться назад
+    </a>
+
+  </div>
+</div>
+{% endblock %}

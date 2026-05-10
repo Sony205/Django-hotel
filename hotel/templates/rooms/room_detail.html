@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ room }} — Django-Hotel{% endblock %}
+
+{% block extra_head %}
+<style>
+  .detail-page {
+    max-width: 900px;
+    margin: 36px auto 72px;
+    padding: 0 32px;
+    animation: fadeUp .5s ease both;
+  }
+
+  /* ── Фото ── */
+  .room-hero {
+    position: relative;
+    border-radius: 18px;
+    overflow: hidden;
+    margin-bottom: 32px;
+    height: 420px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.13);
+  }
+
+  .room-hero img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .hero-badge {
+    position: absolute;
+    top: 18px; left: 18px;
+    padding: 5px 16px;
+    border-radius: 20px;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+  }
+
+  .badge-standard { background: #fff; color: var(--text); }
+  .badge-comfort  { background: var(--accent); color: #fff; }
+  .badge-lux      { background: #2c2c3e; color: #f0c97a; }
+
+  /* ── Основной блок ── */
+  .detail-body {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 28px;
+    align-items: start;
+  }
+
+  @media (max-width: 700px) {
+    .detail-body { grid-template-columns: 1fr; }
+    .room-hero { height: 260px; }
+  }
+
+  /* Левая часть */
+  .detail-main h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+
+  .room-attrs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    font-size: .87rem;
+    color: var(--muted);
+    margin-bottom: 22px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .room-attrs span { display: flex; align-items: center; gap: 6px; }
+
+  .detail-section-title {
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    margin-top: 24px;
+  }
+
+  .room-description {
+    font-size: .92rem;
+    color: var(--text);
+    line-height: 1.75;
+  }
+
+  /* Особенности типа */
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--nav-bg);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: .84rem;
+    color: var(--text);
+  }
+
+  .feature-item svg { flex-shrink: 0; color: var(--accent); }
+
+  /* Правая часть — карточка бронирования */
+  .booking-sidebar {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px 22px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.08);
+    position: sticky;
+    top: 84px;
+  }
+
+  .sidebar-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .sidebar-price small {
+    font-family: 'Raleway', sans-serif;
+    font-size: .82rem;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  .sidebar-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .82rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    margin-top: 6px;
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-available { background: #2ecc71; }
+  .dot-unavailable { background: #e74c3c; }
+
+  .sep { height: 1px; background: #f0f0f0; margin: 18px 0; }
+
+  .sidebar-info {
+    font-size: .83rem;
+    color: var(--muted);
+    margin-bottom: 18px;
+    line-height: 1.6;
+  }
+
+  .btn-book-full {
+    display: block; width: 100%;
+    padding: 12px; text-align: center;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: var(--radius);
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem; font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity .2s, transform .15s;
+  }
+  .btn-book-full:hover { opacity: .88; transform: translateY(-1px); }
+
+  .btn-unavailable-full {
+    display: block; width: 100%;
+    padding: 12px; text-align: center;
+    background: #f0f0f0; color: #aaa;
+    border: none; border-radius: var(--radius);
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem; font-weight: 700;
+    cursor: not-allowed;
+  }
+
+  .back-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    text-decoration: none; color: var(--muted);
+    font-size: .85rem; margin-bottom: 20px;
+    transition: color .2s;
+  }
+  .back-link:hover { color: var(--accent); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-page">
+
+  <a href="{% url 'room_list' %}" class="back-link">&#8592; Назад к номерам</a>
+
+  <!-- ФОТО -->
+  <div class="room-hero">
+    <span class="hero-badge badge-{{ room.room_type }}">{{ room.get_room_type_display }}</span>
+
+    {% if room.images %}
+      <img src="{{ room.images.url }}" alt="{{ room }}"/>
+    {% else %}
+      <img src="{% static 'image/index.jpeg' %}" alt="{{ room }}"/>
+    {% endif %}
+  </div>
+
+  <!-- ОСНОВНОЙ БЛОК -->
+  <div class="detail-body">
+
+    <!-- ЛЕВАЯ ЧАСТЬ -->
+    <div class="detail-main">
+      <h1>{{ room }}</h1>
+
+      <div class="room-attrs">
+        <span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+          Вместимость: {{ room.capacity }} чел.
+        </span>
+        <span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="2" y="7" width="20" height="14" rx="2"/>
+            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+          </svg>
+          Номер: {{ room.number }}
+        </span>
+        <span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          {% if room.is_available %}Свободен{% else %}Занят{% endif %}
+        </span>
+      </div>
+
+      <!-- Описание -->
+      {% if room.description %}
+        <div class="detail-section-title">Описание</div>
+        <p class="room-description">{{ room.description }}</p>
+      {% endif %}
+
+      <!-- Особенности по типу номера -->
+      <div class="detail-section-title">Особенности номера</div>
+      <div class="features-grid">
+
+        {% if room.room_type == 'standard' %}
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Двуспальная кровать
+          </div>
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Телевизор
+          </div>
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Сейф
+          </div>
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            Душевая кабина
+          </div>
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 6l23 0M1 12l23 0M1 18l23 0"/></svg>
+            Постельное бельё
+          </div>
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+            Чайник
+          </div>
+
+        {% elif room.room_type == 'comfort' %}
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Двуспальная кровать
+          </div>
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>
+            Кондиционер
+          </div>
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Smart TV
+          </div>
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Сейф
+          </div>
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Интернет
+          </div>
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Ванная комната
+          </div>
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h18v18H3z"/></svg>
+            Халат и тапочки
+          </div>
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Мини-бар
+          </div>
+
+        {% elif room.room_type == 'lux' %}
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Кровать King-size
+          </div>
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+            Гостиная зона
+          </div>
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Панорамные окна
+          </div>
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>
+            Джакузи
+          </div>
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            Балкон
+          </div>
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
+            Мини-кухня
+          </div>
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>
+            Smart TV
+          </div>
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Персональный сейф
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+
+    <!-- ПРАВАЯ ЧАСТЬ: блок бронирования -->
+    <div class="booking-sidebar">
+      <div class="sidebar-price">
+        {{ room.price_per_night }} ₽ <small>/ ночь</small>
+      </div>
+
+      <div class="sidebar-status">
+        <span class="status-dot {% if room.is_available %}dot-available{% else %}dot-unavailable{% endif %}"></span>
+        {% if room.is_available %}Свободен{% else %}Занят{% endif %}
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="sidebar-info">
+        <strong style="color:var(--text);">{{ room.get_room_type_display }}</strong><br>
+        Комната {{ room.number }} · {{ room.capacity }} чел.
+      </div>
+
+      {% if room.is_available %}
+        <a href="{% url 'create_booking' room.id %}" class="btn-book-full">Забронировать</a>
+      {% else %}
+        <span class="btn-unavailable-full">Недоступен</span>
+      {% endif %}
+
+      <div style="margin-top:14px; font-size:.76rem; color:var(--muted); text-align:center; line-height:1.5;">
+        Бесплатная отмена до даты заезда
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
