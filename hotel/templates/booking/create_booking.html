@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Бронирование — {{ room }} — Django-Hotel{% endblock %}
+{% block title %}Бронирование — {{ room }}{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -13,19 +13,24 @@
     grid-template-columns: 1fr 1.1fr;
     gap: 28px;
     align-items: start;
-    animation: fadeUp .5s ease both;
   }
 
   @media (max-width: 720px) {
-    .booking-page { grid-template-columns: 1fr; padding: 0 18px; }
+    .booking-page {
+      grid-template-columns: 1fr;
+      padding: 0 18px;
+    }
   }
 
-  /* ── Карточка номера (левая колонка) ── */
-  .room-card {
+  .room-card,
+  .booking-form-card {
     background: #fff;
     border-radius: 16px;
-    overflow: hidden;
     box-shadow: 0 4px 24px rgba(0,0,0,.07);
+  }
+
+  .room-card {
+    overflow: hidden;
     position: sticky;
     top: 84px;
   }
@@ -37,7 +42,9 @@
     display: block;
   }
 
-  .room-card-body { padding: 20px 22px 24px; }
+  .room-card-body {
+    padding: 20px 22px 24px;
+  }
 
   .type-badge {
     display: inline-block;
@@ -52,11 +59,24 @@
     margin-bottom: 10px;
   }
 
-  .room-card-body h2 {
+  .room-card-body h2,
+  .booking-form-card h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 1.15rem;
     font-weight: 700;
+  }
+
+  .room-card-body h2 {
+    font-size: 1.15rem;
     margin-bottom: 12px;
+  }
+
+  .booking-form-card {
+    padding: 28px 26px 32px;
+  }
+
+  .booking-form-card h1 {
+    font-size: 1.45rem;
+    margin-bottom: 22px;
   }
 
   .room-attrs {
@@ -68,9 +88,10 @@
     margin-bottom: 18px;
   }
 
-  .room-attrs span { display: flex; align-items: center; gap: 5px; }
-
-  .price-line { padding-top: 14px; border-top: 1px solid #f0f0f0; }
+  .price-line {
+    padding-top: 14px;
+    border-top: 1px solid #f0f0f0;
+  }
 
   .price-main {
     font-family: 'Playfair Display', serif;
@@ -92,21 +113,9 @@
     display: none;
   }
 
-  .price-total strong { color: var(--text); font-size: .95rem; }
-
-  /* ── Форма (правая колонка) ── */
-  .booking-form-card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 28px 26px 32px;
-    box-shadow: 0 4px 24px rgba(0,0,0,.07);
-  }
-
-  .booking-form-card h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.45rem;
-    font-weight: 700;
-    margin-bottom: 22px;
+  .price-total strong {
+    color: var(--text);
+    font-size: .95rem;
   }
 
   .sec {
@@ -118,9 +127,16 @@
     margin: 20px 0 12px;
   }
 
-  .f { margin-bottom: 12px; }
+  .f {
+    margin-bottom: 12px;
+  }
 
-  .f label { display: block; font-size: .83rem; color: var(--muted); margin-bottom: 4px; }
+  .f label {
+    display: block;
+    font-size: .83rem;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
 
   .f input {
     width: 100%;
@@ -132,15 +148,37 @@
     font-size: .91rem;
     color: var(--text);
     outline: none;
-    transition: border-color .2s, background .2s;
   }
 
-  .f input:focus { border-color: var(--accent); background: #fff; }
-  .f input.is-error { border-color: #e74c3c; }
+  .f input:focus {
+    border-color: var(--accent);
+    background: #fff;
+  }
 
-  .err { color: #c0392b; font-size: .78rem; margin-top: 3px; }
+  .f input.is-error {
+    border-color: #e74c3c;
+  }
 
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .err {
+    color: #c0392b;
+    font-size: .78rem;
+    margin-top: 3px;
+  }
+
+  .form-errors {
+    background: #fdecea;
+    color: #c0392b;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: .85rem;
+    margin-bottom: 18px;
+  }
 
   .nights-pill {
     display: none;
@@ -153,31 +191,44 @@
     margin: 8px 0 4px;
   }
 
-  /* Карточка оплаты */
-  .card-icons { display: flex; gap: 7px; margin-bottom: 12px; }
+  .sep {
+    height: 1px;
+    background: #f0f0f0;
+    margin: 20px 0;
+  }
 
-  .card-icon {
+  .services-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .service-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
     background: var(--input-bg);
-    color: var(--muted);
-    font-size: .7rem;
-    font-weight: 700;
-    letter-spacing: .04em;
-    padding: 3px 9px;
-    border-radius: 5px;
+    border-radius: 10px;
+    cursor: pointer;
   }
 
-  .toggle-pw { position: relative; }
-  .toggle-pw input { padding-right: 42px !important; }
-  .eye-btn {
-    position: absolute; right: 12px; top: 50%;
-    transform: translateY(-50%);
-    background: none; border: none;
-    cursor: pointer; color: var(--muted); padding: 0;
-    transition: opacity .2s;
+  .service-item:hover {
+    background: #f5f5f5;
   }
-  .eye-btn:hover { opacity: .6; }
 
-  .sep { height: 1px; background: #f0f0f0; margin: 20px 0; }
+  .service-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  .service-name {
+    font-size: .9rem;
+    font-weight: 600;
+  }
 
   .total-row {
     display: flex;
@@ -186,7 +237,10 @@
     margin-bottom: 16px;
   }
 
-  .total-label { font-size: .88rem; color: var(--muted); }
+  .total-label {
+    font-size: .88rem;
+    color: var(--muted);
+  }
 
   .total-amount {
     font-family: 'Playfair Display', serif;
@@ -194,39 +248,53 @@
     font-weight: 700;
   }
 
-  .form-errors {
-    background: #fdecea;
-    color: #c0392b;
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: .85rem;
-    margin-bottom: 18px;
+  .btn-pay {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
   }
 
-  .btn-pay {
-    display: block; width: 100%; padding: 12px;
-    background: var(--accent); color: #fff;
-    border: none; border-radius: var(--radius);
-    font-family: 'Playfair Display', serif;
-    font-size: 1rem; font-weight: 700;
-    cursor: pointer; letter-spacing: .02em;
-    transition: opacity .2s, transform .15s;
+  .btn-pay:hover {
+    opacity: .88;
   }
-  .btn-pay:hover { opacity: .88; transform: translateY(-1px); }
 
   .secure {
-    display: flex; align-items: center;
-    justify-content: center; gap: 5px;
-    margin-top: 11px; font-size: .76rem; color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 11px;
+    font-size: .76rem;
+    color: var(--muted);
   }
 
   .back-link {
-    display: inline-flex; align-items: center; gap: 6px;
-    text-decoration: none; color: var(--muted);
-    font-size: .85rem; margin: 20px 32px 0;
-    transition: color .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    color: var(--muted);
+    font-size: .85rem;
+    margin: 20px 32px 0;
   }
-  .back-link:hover { color: var(--accent); }
+
+  .back-link:hover {
+    color: var(--accent);
+  }
+
+  .empty-services {
+    color: var(--muted);
+    font-size: .85rem;
+    padding: 10px 0;
+  }
 </style>
 {% endblock %}
 
@@ -235,31 +303,21 @@
 
 <div class="booking-page">
 
-  <!-- ══ ЛЕВАЯ: карточка номера ══ -->
   <div class="room-card">
     {% if room.images %}
-      <img src="{{ room.images.url }}" alt="{{ room }}"/>
+      <img src="{{ room.images.url }}" alt="{{ room }}">
     {% else %}
-      <img src="{% static 'image/index.jpeg' %}" alt="{{ room }}"/>
+      <img src="{% static 'image/index.jpeg' %}" alt="{{ room }}">
     {% endif %}
 
     <div class="room-card-body">
       <div class="type-badge">{{ room.get_room_type_display }}</div>
+
       <h2>{{ room }}</h2>
 
       <div class="room-attrs">
-        <span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-          </svg>
-          {{ room.capacity }} чел.
-        </span>
-        <span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-          </svg>
-          Свободен
-        </span>
+        <span>{{ room.capacity }} чел.</span>
+        <span>Свободен</span>
       </div>
 
       {% if room.description %}
@@ -272,28 +330,29 @@
         <div class="price-main">
           {{ room.price_per_night }} ₽ <small>/ ночь</small>
         </div>
+
         <div class="price-total" id="side-total">
-          Итого за <strong id="side-nights"></strong>:&nbsp;
+          Итого за <strong id="side-nights"></strong>:
           <strong id="side-amount"></strong>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ══ ПРАВАЯ: форма бронирования ══ -->
   <div class="booking-form-card">
     <h1>Оформление брони</h1>
 
     {% if form.non_field_errors %}
       <div class="form-errors">
-        {% for err in form.non_field_errors %}{{ err }}<br>{% endfor %}
+        {% for err in form.non_field_errors %}
+          {{ err }}<br>
+        {% endfor %}
       </div>
     {% endif %}
 
     <form method="post">
       {% csrf_token %}
 
-      <!-- ДАТЫ -->
       <div class="sec">Даты проживания</div>
 
       <div class="row2">
@@ -307,7 +366,7 @@
             min="{% now 'Y-m-d' %}"
             class="{% if form.booking_date.errors %}is-error{% endif %}"
             required
-          />
+          >
           {% if form.booking_date.errors %}
             <div class="err">{{ form.booking_date.errors|join:' ' }}</div>
           {% endif %}
@@ -323,7 +382,7 @@
             min="{% now 'Y-m-d' %}"
             class="{% if form.expiration_date.errors %}is-error{% endif %}"
             required
-          />
+          >
           {% if form.expiration_date.errors %}
             <div class="err">{{ form.expiration_date.errors|join:' ' }}</div>
           {% endif %}
@@ -334,68 +393,67 @@
 
       <div class="sep"></div>
 
-      <!-- ДАННЫЕ ГОСТЯ (из профиля, только для отображения) -->
+      <div class="sec">Дополнительные услуги</div>
+
+      <div class="services-list">
+        {% if form.servises %}
+          {% for checkbox in form.servises %}
+            <label class="service-item">
+              {{ checkbox.tag }}
+              <span class="service-name">{{ checkbox.choice_label }}</span>
+            </label>
+          {% endfor %}
+        {% else %}
+          <div class="empty-services">Дополнительные услуги пока не добавлены.</div>
+        {% endif %}
+      </div>
+
+      {% if form.servises.errors %}
+        <div class="err">{{ form.servises.errors|join:' ' }}</div>
+      {% endif %}
+
+      <div class="sep"></div>
+
       <div class="sec">Данные гостя</div>
 
       <div class="f">
         <label>Имя пользователя</label>
-        <input type="text" value="{{ request.user.username }}" readonly
-               style="opacity:.65; cursor:default;"/>
+        <input type="text" value="{{ request.user.username }}" readonly style="opacity:.65; cursor:default;">
       </div>
 
       <div class="f">
         <label>Email</label>
-        <input type="email" value="{{ request.user.email }}" readonly
-               style="opacity:.65; cursor:default;"/>
+        <input type="email" value="{{ request.user.email }}" readonly style="opacity:.65; cursor:default;">
       </div>
 
       <div class="sep"></div>
 
-      <!-- ОПЛАТА -->
       <div class="sec">Данные карты</div>
-
-      <div class="card-icons">
-        <span class="card-icon">VISA</span>
-        <span class="card-icon">MIR</span>
-        <span class="card-icon">MC</span>
-      </div>
 
       <div class="f">
         <label for="card_number">Номер карты</label>
-        <input type="text" id="card_number" placeholder="0000 0000 0000 0000"
-               maxlength="19" inputmode="numeric" autocomplete="cc-number" required/>
+        <input type="text" id="card_number" placeholder="0000 0000 0000 0000" maxlength="19" required>
       </div>
 
       <div class="row2">
         <div class="f">
           <label for="card_expiry">Срок действия</label>
-          <input type="text" id="card_expiry" placeholder="ММ/ГГ"
-                 maxlength="5" inputmode="numeric" autocomplete="cc-exp" required/>
+          <input type="text" id="card_expiry" placeholder="ММ/ГГ" maxlength="5" required>
         </div>
+
         <div class="f">
           <label for="card_cvv">CVV</label>
-          <div class="toggle-pw">
-            <input type="password" id="card_cvv" placeholder="•••"
-                   maxlength="3" inputmode="numeric" autocomplete="cc-csc" required/>
-            <button type="button" class="eye-btn" onclick="toggleVis('card_cvv',this)">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-            </button>
-          </div>
+          <input type="password" id="card_cvv" placeholder="•••" maxlength="3" required>
         </div>
       </div>
 
       <div class="f">
         <label for="card_holder">Имя на карте</label>
-        <input type="text" id="card_holder" placeholder="IVAN IVANOV"
-               autocomplete="cc-name" style="text-transform:uppercase;" required/>
+        <input type="text" id="card_holder" placeholder="IVAN IVANOV" required>
       </div>
 
       <div class="sep"></div>
 
-      <!-- ИТОГ -->
       <div class="total-row">
         <span class="total-label">Итого к оплате:</span>
         <span class="total-amount" id="total-amount">— ₽</span>
@@ -403,16 +461,9 @@
 
       <button type="submit" class="btn-pay">Подтвердить и оплатить</button>
 
-      <div class="secure">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="11" width="18" height="11" rx="2"/>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
-        Данные передаются по защищённому соединению
-      </div>
+      <div class="secure">Данные передаются по защищённому соединению</div>
     </form>
   </div>
-
 </div>
 {% endblock %}
 
@@ -420,49 +471,60 @@
 <script>
   const PPN = parseFloat("{{ room.price_per_night }}") || 0;
 
-  const inEl   = document.getElementById('{{ form.booking_date.id_for_label }}');
-  const outEl  = document.getElementById('{{ form.expiration_date.id_for_label }}');
-  const pill   = document.getElementById('nights-pill');
-  const total  = document.getElementById('total-amount');
+  const inEl = document.getElementById('{{ form.booking_date.id_for_label }}');
+  const outEl = document.getElementById('{{ form.expiration_date.id_for_label }}');
+  const pill = document.getElementById('nights-pill');
+  const total = document.getElementById('total-amount');
   const sTotal = document.getElementById('side-total');
   const sNight = document.getElementById('side-nights');
-  const sAmt   = document.getElementById('side-amount');
+  const sAmt = document.getElementById('side-amount');
 
-  function fmt(n) { return n.toLocaleString('ru-RU') + ' ₽'; }
+  function fmt(n) {
+    return n.toLocaleString('ru-RU') + ' ₽';
+  }
 
   function nightWord(n) {
     if (n % 10 === 1 && n % 100 !== 11) return 'ночь';
-    if ([2,3,4].includes(n % 10) && ![12,13,14].includes(n % 100)) return 'ночи';
+    if ([2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100)) return 'ночи';
     return 'ночей';
   }
 
   function recalc() {
     if (!inEl.value || !outEl.value) return;
+
     const nights = Math.round((new Date(outEl.value) - new Date(inEl.value)) / 86400000);
+
     if (nights <= 0) {
-      pill.style.display   = 'none';
-      total.textContent    = '— ₽';
+      pill.style.display = 'none';
+      total.textContent = '— ₽';
       sTotal.style.display = 'none';
       return;
     }
+
     const sum = PPN * nights;
-    const nw  = nightWord(nights);
-    pill.textContent     = `${nights} ${nw}`;
-    pill.style.display   = 'inline-block';
-    total.textContent    = fmt(sum);
-    sNight.textContent   = `${nights} ${nw}`;
-    sAmt.textContent     = fmt(sum);
+    const nw = nightWord(nights);
+
+    pill.textContent = `${nights} ${nw}`;
+    pill.style.display = 'inline-block';
+
+    total.textContent = fmt(sum);
+
+    sNight.textContent = `${nights} ${nw}`;
+    sAmt.textContent = fmt(sum);
     sTotal.style.display = 'block';
   }
 
-  inEl.addEventListener('change', () => {
-    if (outEl.value && outEl.value <= inEl.value) outEl.value = '';
+  inEl.addEventListener('change', function () {
+    if (outEl.value && outEl.value <= inEl.value) {
+      outEl.value = '';
+    }
+
     outEl.min = inEl.value;
     recalc();
   });
+
   outEl.addEventListener('change', recalc);
 
-  // Форматирование карты
   document.getElementById('card_number').addEventListener('input', function () {
     let v = this.value.replace(/\D/g, '').slice(0, 16);
     this.value = v.replace(/(.{4})/g, '$1 ').trim();
@@ -470,19 +532,17 @@
 
   document.getElementById('card_expiry').addEventListener('input', function () {
     let v = this.value.replace(/\D/g, '').slice(0, 4);
-    if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2);
+
+    if (v.length >= 3) {
+      v = v.slice(0, 2) + '/' + v.slice(2);
+    }
+
     this.value = v;
   });
 
   document.getElementById('card_holder').addEventListener('input', function () {
     this.value = this.value.toUpperCase();
   });
-
-  function toggleVis(id, btn) {
-    const el = document.getElementById(id);
-    el.type = el.type === 'password' ? 'text' : 'password';
-    btn.style.opacity = el.type === 'text' ? '0.45' : '1';
-  }
 
   recalc();
 </script>
