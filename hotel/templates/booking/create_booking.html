@@ -437,8 +437,24 @@
 
       <div class="row2">
         <div class="f">
-          <label for="card_expiry">Срок действия</label>
-          <input type="text" id="card_expiry" placeholder="ММ/ГГ" maxlength="5" required>
+            <label for="card_expiry">Срок действия</label>
+
+            <input
+                type="text"
+                name="card_expiry"
+                id="card_expiry"
+                placeholder="ММ/ГГ"
+                maxlength="5"
+                required
+                value="{{ form.card_expiry.value|default:'' }}"
+                class="{% if form.card_expiry.errors %}is-error{% endif %}"
+            >
+
+            {% if form.card_expiry.errors %}
+                <div class="err">
+                {{ form.card_expiry.errors|join:' ' }}
+                </div>
+            {% endif %}
         </div>
 
         <div class="f">
