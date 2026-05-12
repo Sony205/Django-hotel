@@ -19,6 +19,9 @@ from django.urls import path, include
 from users import views
 from django.contrib.auth import views as auth_views
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name='home'),
@@ -33,5 +36,5 @@ urlpatterns = [
     path('password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
     path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
     path('rooms/',   include('rooms.urls')),
-    path('booking/', include('booking.urls'))
-]
+    path('booking/', include('booking.urls')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
