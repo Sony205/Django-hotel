@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from .validators import real_number, real_email
+from .validators import real_number
 
 
 class CustomUser(AbstractUser):
@@ -32,12 +32,12 @@ class AccountInfo(models.Model):
         unique=True,
         validators=[real_number]
     )
-    email = models.TextField(
-        'Почта',
-        blank=False,
-        unique=True,
-        validators=[real_email]
-    )
+    # email = models.TextField(
+    #     'Почта',
+    #     blank=False,
+    #     unique=True,
+    #     validators=[real_email]
+    # )
     birthday = models.DateField(
         'Дата рождения',
         blank=True,
