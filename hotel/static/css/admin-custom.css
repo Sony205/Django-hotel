@@ -1,0 +1,235 @@
+/* ══════════════════════════════════════════════════════════════
+   Django-Hotel — Кастомный стиль для Django Admin
+   Акцент:   #5b5bd6  (кнопки проекта, .btn-solid)
+   Тёмный:   #2a2a3e  (footer-bg проекта)
+   Светлый:  #ebebf8  (nav-bg проекта)
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Корневые переменные ─────────────────────────────────────── */
+:root {
+    --accent:      #5b5bd6;
+    --accent-dark: #4848b8;
+    --dark:        #2a2a3e;
+    --dark-light:  #363652;
+    --nav-bg:      #ebebf8;
+    --text-light:  #c8c8e0;
+    --radius:      8px;
+}
+
+/* ── Шапка (#header) ─────────────────────────────────────────── */
+#header {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(91, 91, 214, .35);
+}
+
+#header a:link,
+#header a:visited {
+    color: rgba(255, 255, 255, .92);
+}
+
+#header a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+#branding h1,
+#branding h1 a:link,
+#branding h1 a:visited {
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: .02em;
+}
+
+/* ── Навигационные вкладки (app-list tabs) ───────────────────── */
+div.module h2,
+div.module caption,
+thead th {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* ── Боковая колонка (nav-sidebar) ──────────────────────────── */
+#nav-sidebar {
+    background: var(--dark);
+}
+
+#nav-sidebar .module h2 {
+    background: var(--dark-light);
+    color: var(--text-light);
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+
+#nav-sidebar .module a:link,
+#nav-sidebar .module a:visited {
+    color: var(--text-light);
+    padding: 4px 10px;
+    display: block;
+    border-radius: 4px;
+    transition: background .15s;
+}
+
+#nav-sidebar .module a:hover {
+    background: rgba(91, 91, 214, .25);
+    color: #fff;
+}
+
+#nav-sidebar .current-app .module__name,
+#nav-sidebar .current-app .module__name:hover {
+    color: #fff;
+    font-weight: 600;
+}
+
+/* ── Контент / тёмный фон breadcrumbs ───────────────────────── */
+#content-main .module {
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+/* ── Кнопки (submit-row) ─────────────────────────────────────── */
+.submit-row input[type="submit"],
+.submit-row input.default,
+.submit-row button,
+.submit-row a.closelink {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 8px 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, opacity .15s;
+}
+
+.submit-row input[type="submit"]:hover,
+.submit-row input.default:hover,
+.submit-row button:hover {
+    background: var(--accent-dark);
+}
+
+/* Кнопка «Удалить» остаётся красной */
+.submit-row a.deletelink,
+.deletelink-box a {
+    background: #ba2121 !important;
+    color: #fff !important;
+    border-radius: var(--radius);
+    padding: 8px 18px;
+    font-weight: 600;
+}
+
+/* ── Кнопки-ссылки в change-list ─────────────────────────────── */
+.button,
+input[type="submit"],
+input[type="button"],
+.submit-row input {
+    border-radius: var(--radius);
+}
+
+a.button:link,
+a.button:visited {
+    background: var(--accent);
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 6px 14px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+a.button:hover {
+    background: var(--accent-dark);
+}
+
+/* ── Фильтр (справа) ─────────────────────────────────────────── */
+#changelist-filter {
+    background: var(--dark);
+}
+
+#changelist-filter h2 {
+    background: var(--dark-light);
+    color: var(--text-light);
+}
+
+#changelist-filter h3 {
+    color: var(--text-light);
+    border-bottom: 1px solid rgba(255, 255, 255, .07);
+}
+
+#changelist-filter ul {
+    padding: 6px 0;
+}
+
+#changelist-filter li a,
+#changelist-filter li a:link,
+#changelist-filter li a:visited {
+    color: var(--text-light);
+    transition: color .15s;
+}
+
+#changelist-filter li a:hover {
+    color: #fff;
+}
+
+#changelist-filter li.selected a {
+    color: #fff;
+    font-weight: 600;
+}
+
+/* ── Breadcrumbs ─────────────────────────────────────────────── */
+div.breadcrumbs {
+    background: var(--dark);
+    color: var(--text-light);
+    padding: 8px 16px;
+}
+
+div.breadcrumbs a {
+    color: var(--text-light);
+}
+
+div.breadcrumbs a:hover {
+    color: #fff;
+}
+
+/* ── Пагинация ───────────────────────────────────────────────── */
+.paginator a,
+.paginator a:link,
+.paginator a:visited {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 4px;
+    padding: 3px 8px;
+    text-decoration: none;
+}
+
+.paginator a:hover {
+    background: var(--accent-dark);
+}
+
+/* ── Полоска «success» сообщений ────────────────────────────── */
+.messagelist .success {
+    background: #eef6ee;
+    border-left: 4px solid var(--accent);
+}
+
+/* ── Hover на строках таблицы ────────────────────────────────── */
+#result_list tbody tr:hover td,
+#result_list tbody tr:hover th {
+    background: #e8e8f8;
+    color: var(--dark);
+}
+
+#result_list tbody tr:hover td a,
+#result_list tbody tr:hover th a {
+    color: var(--accent-dark);
+}
+
+/* ── Сортировка столбцов ─────────────────────────────────────── */
+thead th a:hover {
+    color: #fff;
+    opacity: .85;
+}
+
+/* ── Fieldsets ───────────────────────────────────────────────── */
+fieldset.collapse .collapse-toggle:link,
+fieldset.collapse .collapse-toggle:visited {
+    color: var(--accent);
+}

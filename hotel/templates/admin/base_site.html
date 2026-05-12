@@ -1,0 +1,29 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | Django-Hotel Админка{% endblock %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/admin-custom.css' %}">
+{% endblock %}
+
+{% block branding %}
+    <h1 id="site-name">
+        <a href="{% url 'admin:index' %}">
+            🏨 Django-Hotel &nbsp;·&nbsp; Административная панель
+        </a>
+    </h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block userlinks %}
+    {% if site_url %}
+        <a href="{{ site_url }}">На сайт</a> /
+    {% endif %}
+    {% if user.is_active and user.is_staff %}
+        <a href="{% url 'admin:password_change' %}">Сменить пароль</a> /
+    {% endif %}
+    <a href="{% url 'admin:logout' %}">Выйти</a>
+{% endblock %}

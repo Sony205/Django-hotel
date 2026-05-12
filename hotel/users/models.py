@@ -6,6 +6,10 @@ from .validators import real_number,real_email
 class CustomUser(AbstractUser):
     pass
 
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+
 
 class AccountInfo(models.Model):
     first_name = models.CharField(
