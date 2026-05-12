@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -31,8 +31,9 @@ def create_booking(request, room_id):
                 booking = form.save(commit=False)
                 booking.client = request.user
                 booking.room = room
-                booking.status = 'sleeping'
+                booking.status = 'active'
                 booking.save()
+                form.save_m2m()
 
                 messages.success(request, 'Бронирование успешно создано.')
                 return redirect('my_bookings')
@@ -47,9 +48,13 @@ def create_booking(request, room_id):
 
 @login_required
 def my_bookings(request):
+    Booking.objects.filter(
+        expiration_date__lt=timezone.now().date()
+    ).exclude(status='dead').update(status='dead')
+
     bookings = Booking.objects.filter(
         client=request.user
-    ).select_related('room').order_by('-created_at')
+    ).select_related('room').prefetch_related('servises').order_by('-created_at')
 
     return render(request, 'booking/my_bookings.html', {
         'bookings': bookings,
@@ -74,54 +79,3 @@ def cancel_booking(request, booking_id):
     return render(request, 'booking/cancel_booking.html', {
         'booking': booking,
     })
-
-
-def is_manager(user):
-    return user.is_staff or user.is_superuser
-
-
-@user_passes_test(is_manager)
-def booking_list(request):
-    bookings = Booking.objects.select_related(
-        'client',
-        'room'
-    ).order_by('-created_at')
-
-    return render(request, 'booking/booking_list.html', {
-        'bookings': bookings,
-    })
-
-
-@user_passes_test(is_manager)
-def confirm_booking(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id)
-
-    if request.method == 'POST':
-        booking.status = 'active'
-        booking.save()
-
-        messages.success(request, 'Бронирование подтверждено.')
-
-    return redirect('booking_list')
-
-
-@user_passes_test(is_manager)
-def complete_booking(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id)
-
-    if request.method == 'POST':
-        booking.status = 'dead'
-        booking.save()
-
-        messages.success(request, 'Бронирование завершено.')
-
-    return redirect('booking_list')
-
-
-@login_required
-def update_completed_bookings(request):
-    Booking.objects.filter(
-        expiration_date__lt=timezone.now().date()
-    ).exclude(status='dead').update(status='dead')
-
-    return redirect('my_bookings')
