@@ -396,11 +396,16 @@
       <div class="sec">Дополнительные услуги</div>
 
       <div class="services-list">
-        {% if form.servises %}
-          {% for checkbox in form.servises %}
+        {% if services %}
+          {% for service in services %}
             <label class="service-item">
-              {{ checkbox.tag }}
-              <span class="service-name">{{ checkbox.choice_label }}</span>
+              <input type="checkbox" 
+                    name="servises" 
+                    value="{{ service.id }}"
+                    data-price="{{ service.cost }}">
+              <span class="service-name">
+                {{ service.name }} — {{ service.cost }} ₽
+              </span>
             </label>
           {% endfor %}
         {% else %}
@@ -517,18 +522,42 @@
       return;
     }
 
-    const sum = PPN * nights;
+    // Считаем стоимость услуг
+    let servicesSum = 0;
+    const checkboxes = document.querySelectorAll('.service-item input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+      if (cb.checked) {
+        // Цена услуги хранится в data-атрибуте или в тексте
+        const price = parseFloat(cb.getAttribute('data-price') || 0);
+        servicesSum += price;
+      }
+    });
+
+    const roomSum = PPN * nights;
+    const totalSum = roomSum + servicesSum;
     const nw = nightWord(nights);
 
     pill.textContent = `${nights} ${nw}`;
     pill.style.display = 'inline-block';
 
-    total.textContent = fmt(sum);
+    total.textContent = fmt(totalSum);
 
     sNight.textContent = `${nights} ${nw}`;
-    sAmt.textContent = fmt(sum);
+    sAmt.textContent = fmt(totalSum);
     sTotal.style.display = 'block';
   }
+
+  function bindServicesChange() {
+    const checkboxes = document.querySelectorAll('.service-item input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', recalc);
+    });
+  }
+
+  // Вызовите после загрузки страницы
+  document.addEventListener('DOMContentLoaded', function() {
+      bindServicesChange();
+  });
 
   inEl.addEventListener('change', function () {
     if (outEl.value && outEl.value <= inEl.value) {

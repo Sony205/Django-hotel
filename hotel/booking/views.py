@@ -5,7 +5,7 @@ from django.utils import timezone
 
 from rooms.models import Room
 from .forms import BookingForm
-from .models import Booking
+from .models import Booking, Services
 
 
 @login_required
@@ -40,9 +40,11 @@ def create_booking(request, room_id):
     else:
         form = BookingForm()
 
+    services = Services.objects.all()
     return render(request, 'booking/create_booking.html', {
         'form': form,
         'room': room,
+        'services': services,
     })
 
 
@@ -55,7 +57,7 @@ def my_bookings(request):
     bookings = Booking.objects.filter(
         client=request.user
     ).select_related('room').prefetch_related('servises').order_by('-created_at')
-
+    
     return render(request, 'booking/my_bookings.html', {
         'bookings': bookings,
     })
