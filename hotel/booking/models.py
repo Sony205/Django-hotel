@@ -16,7 +16,11 @@ class Services(models.Model):
         null=False,
         default=0
     )
-
+    
+    class Meta:
+        verbose_name = 'Услуга'
+        verbose_name_plural = 'Услуги'
+    
 
 class Booking(models.Model):
     BOOKING_STATUS = [

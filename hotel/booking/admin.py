@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Booking
+from .models import Booking, Services
 
 
 @admin.register(Booking)
@@ -16,3 +16,10 @@ class BookingAdmin(admin.ModelAdmin):
     search_fields = ('client__username', 'client__email', 'room__room_number')
     list_editable = ('status',)
     ordering = ('-created_at',)
+
+@admin.register(Services)
+class ServicesAdmin(admin.ModelAdmin):
+    list_display = (
+        'name',
+        'cost',
+    )
