@@ -198,13 +198,16 @@
 
           <!-- Кнопка отмены только для активных/ожидающих -->
           {% if booking.status != 'dead' %}
-            <form method="post" action="{% url 'cancel_booking' booking.id %}">
-              {% csrf_token %}
-              <button type="submit" class="btn-cancel"
-                      onclick="return confirm('Отменить бронирование?')">
-                Отменить
-              </button>
-            </form>
+            <a href="{% url 'cancel_booking' booking.id %}"
+                class="btn-cancel"
+                 style="
+                    display:inline-flex;
+                    align-items:center;
+                    justify-content:center;
+                    text-decoration:none;
+                 ">
+                 Отменить
+            </a>
           {% endif %}
         </div>
 

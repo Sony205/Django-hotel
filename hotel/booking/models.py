@@ -12,7 +12,6 @@ class Services(models.Model):
     )
     cost = models.IntegerField(
         'Стоимость',
-        max_length=20,
         null=False,
         default=0
     )
@@ -22,52 +21,60 @@ class Services(models.Model):
         verbose_name_plural = 'Услуги'
     
 
+    def __str__(self):
+        return f'{self.name} — {self.cost} ₽'
+
+
 class Booking(models.Model):
     BOOKING_STATUS = [
         ('sleeping', 'Ожидает'),
         ('active', 'Активна'),
         ('dead', 'Завершена'),
     ]
+
     client = models.ForeignKey(
         CustomUser,
         null=True,
         default=None,
         on_delete=models.SET_NULL,
-        related_name="client",
+        related_name='bookings',
         verbose_name='Клиент'
     )
+
     room = models.ForeignKey(
         Room,
         null=False,
         on_delete=models.CASCADE,
-        related_name="room",
-        verbose_name="Комната"
+        related_name='bookings',
+        verbose_name='Комната'
     )
+
     servises = models.ManyToManyField(
         Services,
-        related_name="services",
-        verbose_name="Услуги"
+        blank=True,
+        related_name='bookings',
+        verbose_name='Услуги'
     )
+
     booking_date = models.DateField(
-        'Дата начала брони',
-        blank=True
+        'Дата начала брони'
     )
+
     expiration_date = models.DateField(
-        'Дата окончания брони',
-        blank=None,
-        null=None,
+        'Дата окончания брони'
     )
+
     status = models.CharField(
         'Статус брони',
         max_length=15,
         choices=BOOKING_STATUS,
-        default='sleeping',
+        default='active',
     )
+
     created_at = models.DateTimeField(
         'Дата создания',
         auto_now_add=True,
     )
 
-    class Meta:
-        verbose_name = 'Бронь'
-        verbose_name_plural = 'Бронирование'
+    def __str__(self):
+        return f'Бронь №{self.id}: {self.client} — {self.room}'
