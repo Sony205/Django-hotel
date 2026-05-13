@@ -227,18 +227,3 @@ thead th a:hover {
     color: #fff;
     opacity: .85;
 }
-
-/* ── Fieldsets ───────────────────────────────────────────────── */
-fieldset.collapse .collapse-toggle:link,
-fieldset.collapse .collapse-toggle:visited {
-    color: var(--accent);
-
-/* Изменим цвет верхней панели */
-#header {
-    background-color: #2c3e50;
-}
-
-/* Изменим цвет кнопки сохранения */
-.submit-row input.default {
-    background-color: #27ae60;
-}
