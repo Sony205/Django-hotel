@@ -9,12 +9,3 @@ def real_number(value) -> None:
         raise ValidationError(
             'Номер телефона должен иметь вид:\n+7 или 8(999)999-99-99'
         )
-
-
-def real_email(value) -> None:
-    regex = r'^[a-zA-Z0-9\-\_]+\@(gmail\.com|mail\.ru)'
-    match = re.match(regex, value)
-    if match is None:
-        raise ValidationError(
-            'Используйте gmail или mail'
-        )

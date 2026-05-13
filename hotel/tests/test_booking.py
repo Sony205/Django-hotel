@@ -51,24 +51,29 @@ class TestBookingModel:
 class TestBookingForm:
     """Тесты формы бронирования."""
 
-    def test_valid_booking_form(self):
-        """Форма с корректными датами валидна."""
-        from booking.forms import BookingForm
+    def _valid_data(self):
+        """Минимальный набор валидных данных для формы."""
         today = timezone.now().date()
-        form = BookingForm(data={
+        return {
             'booking_date': today + timedelta(days=1),
             'expiration_date': today + timedelta(days=5),
-        })
-        assert form.is_valid()
+            'card_expiry': '12/27',
+            # servises — ManyToMany, blank=True, не обязателен
+        }
+
+    def test_valid_booking_form(self):
+        """Форма с корректными данными валидна."""
+        from booking.forms import BookingForm
+        form = BookingForm(data=self._valid_data())
+        assert form.is_valid(), form.errors
 
     def test_booking_date_in_past(self):
         """Нельзя забронировать на прошедшую дату."""
         from booking.forms import BookingForm
         today = timezone.now().date()
-        form = BookingForm(data={
-            'booking_date': today - timedelta(days=1),
-            'expiration_date': today + timedelta(days=5),
-        })
+        data = self._valid_data()
+        data['booking_date'] = today - timedelta(days=1)
+        form = BookingForm(data=data)
         assert not form.is_valid()
         assert 'booking_date' in form.errors
 
@@ -76,10 +81,10 @@ class TestBookingForm:
         """Дата окончания не может быть раньше даты начала."""
         from booking.forms import BookingForm
         today = timezone.now().date()
-        form = BookingForm(data={
-            'booking_date': today + timedelta(days=5),
-            'expiration_date': today + timedelta(days=2),
-        })
+        data = self._valid_data()
+        data['booking_date'] = today + timedelta(days=5)
+        data['expiration_date'] = today + timedelta(days=2)
+        form = BookingForm(data=data)
         assert not form.is_valid()
 
     def test_expiration_equals_booking(self):
@@ -87,10 +92,10 @@ class TestBookingForm:
         from booking.forms import BookingForm
         today = timezone.now().date()
         same_day = today + timedelta(days=3)
-        form = BookingForm(data={
-            'booking_date': same_day,
-            'expiration_date': same_day,
-        })
+        data = self._valid_data()
+        data['booking_date'] = same_day
+        data['expiration_date'] = same_day
+        form = BookingForm(data=data)
         assert not form.is_valid()
 
     def test_missing_dates(self):
@@ -99,8 +104,48 @@ class TestBookingForm:
         form = BookingForm(data={})
         assert not form.is_valid()
 
+    # Тесты валидации card_expiry
 
+    def test_card_expiry_missing(self):
+        """Форма без card_expiry невалидна."""
+        from booking.forms import BookingForm
+        data = self._valid_data()
+        del data['card_expiry']
+        form = BookingForm(data=data)
+        assert not form.is_valid()
+        assert 'card_expiry' in form.errors
+
+    def test_card_expiry_wrong_format(self):
+        """card_expiry без слеша не проходит валидацию."""
+        from booking.forms import BookingForm
+        data = self._valid_data()
+        data['card_expiry'] = '1227'
+        form = BookingForm(data=data)
+        assert not form.is_valid()
+        assert 'card_expiry' in form.errors
+
+    def test_card_expiry_invalid_month(self):
+        """Месяц > 12 не проходит валидацию."""
+        from booking.forms import BookingForm
+        data = self._valid_data()
+        data['card_expiry'] = '13/27'
+        form = BookingForm(data=data)
+        assert not form.is_valid()
+        assert 'card_expiry' in form.errors
+
+    def test_card_expiry_expired(self):
+        """Просроченная карта (год < 26) не проходит валидацию."""
+        from booking.forms import BookingForm
+        data = self._valid_data()
+        data['card_expiry'] = '12/24'
+        form = BookingForm(data=data)
+        assert not form.is_valid()
+        assert 'card_expiry' in form.errors
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # Тестирование views бронирования — авторизация
+# ══════════════════════════════════════════════════════════════════════════════
 
 @pytest.mark.django_db
 class TestBookingViewsAuth:
@@ -138,7 +183,9 @@ class TestBookingViewsAuth:
         assert response.status_code == 302
 
 
+# ══════════════════════════════════════════════════════════════════════════════
 # Тестирование создания брони
+# ══════════════════════════════════════════════════════════════════════════════
 
 @pytest.mark.django_db
 class TestCreateBookingView:
@@ -158,6 +205,7 @@ class TestCreateBookingView:
         data = {
             'booking_date': today + timedelta(days=1),
             'expiration_date': today + timedelta(days=4),
+            'card_expiry': '12/27',
         }
         response = auth_client.post(url, data)
         assert response.status_code == 302

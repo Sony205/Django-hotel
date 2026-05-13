@@ -25,5 +25,5 @@
     {% if user.is_active and user.is_staff %}
         <a href="{% url 'admin:password_change' %}">Сменить пароль</a> /
     {% endif %}
-    <a href="{% url 'admin:logout' %}">Выйти</a>
+    <a href="{% url 'logout' %}">Выйти</a>
 {% endblock %}

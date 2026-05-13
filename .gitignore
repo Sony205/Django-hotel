@@ -4,6 +4,5 @@ __pycache__/
 *.pyo
 
 # Django
-*.sqlite3
 /staticfiles/
 /mediafiles/

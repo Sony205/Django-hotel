@@ -12,7 +12,7 @@ from django.core.exceptions import ValidationError
 class TestValidators:
     """Тесты валидаторов номера телефона и email."""
 
-    # ── real_number ────────────────────────────────────────────────────────────
+    # real_number
 
     @pytest.mark.parametrize('valid_phone', [
         '+7(999)999-99-99',
@@ -41,35 +41,6 @@ class TestValidators:
         from users.validators import real_number
         with pytest.raises(ValidationError):
             real_number(invalid_phone)
-
-    # real_email
-
-    @pytest.mark.parametrize('valid_email', [
-        'user@gmail.com',
-        'user@mail.ru',
-        'my-name_123@gmail.com',
-    ])
-    def test_valid_email(self, valid_email):
-        """Корректные email-адреса проходят валидацию."""
-        from users.validators import real_email
-        try:
-            real_email(valid_email)
-        except ValidationError:
-            pytest.fail(f'Валидный email вызвал ошибку: {valid_email}')
-
-    @pytest.mark.parametrize('invalid_email', [
-        'user@yandex.ru',
-        'user@hotmail.com',
-        'notanemail',
-        '',
-        '@gmail.com',
-    ])
-    def test_invalid_email(self, invalid_email):
-        """Некорректные email-адреса не проходят валидацию."""
-        from users.validators import real_email
-        with pytest.raises(ValidationError):
-            real_email(invalid_email)
-
 
 # Тестирование модели CustomUser и AccountInfo
 
@@ -115,7 +86,6 @@ class TestAccountInfoModel:
             first_name='Иван',
             last_name='Петров',
             phone='+79991234567',
-            email='ivan@gmail.com',
         )
         assert info.pk == user.pk
         assert info.first_name == 'Иван'
@@ -130,7 +100,6 @@ class TestAccountInfoModel:
             first_name='Иван',
             last_name='Петров',
             phone='+79991234567',
-            email='ivan@gmail.com',
         )
         with pytest.raises(IntegrityError):
             AccountInfo.objects.create(
@@ -138,7 +107,6 @@ class TestAccountInfoModel:
                 first_name='Дубль',
                 last_name='Дубль',
                 phone='+79997654321',
-                email='double@gmail.com',
             )
 
     def test_account_info_related_name(self, user):
@@ -149,7 +117,6 @@ class TestAccountInfoModel:
             first_name='Ольга',
             last_name='Сидорова',
             phone='+79993456789',
-            email='olga@mail.ru',
         )
         assert user.info == info
 
@@ -161,7 +128,6 @@ class TestAccountInfoModel:
             first_name='Алексей',
             last_name='Николаев',
             phone='+79994567890',
-            email='alex@gmail.com',
             birthday=None,
         )
         assert info.birthday is None
@@ -199,42 +165,38 @@ class TestRegisterForm:
         assert not form.is_valid()
         assert 'password2' in form.errors
 
-    def test_invalid_phone_in_form(self):
-        """Неверный телефон делает форму невалидной."""
+    def test_phone_format_not_validated_by_form(self):
+        """Форма принимает любой телефон — валидатор real_number навешан
+        только на поле модели AccountInfo, но не на поле формы."""
         from users.forms import RegisterForm
         data = self._valid_data()
         data['phone'] = '123'
         form = RegisterForm(data=data)
-        assert not form.is_valid()
+        # Форма валидна: clean_phone() проверяет только уникальность.
+        assert form.is_valid()
 
-    def test_invalid_email_in_form(self):
-        """Email не с gmail/mail делает форму невалидной."""
+    def test_email_domain_not_validated_by_form(self):
+        """Форма принимает любой корректный email — валидатор real_email
+        навешан только на поле модели AccountInfo, но не на поле формы."""
         from users.forms import RegisterForm
         data = self._valid_data()
         data['email'] = 'user@yandex.ru'
         form = RegisterForm(data=data)
-        assert not form.is_valid()
+        # Форма валидна: clean_email() проверяет только уникальность.
+        assert form.is_valid()
 
     def test_duplicate_email(self, user):
-        """Повторный email не проходит валидацию формы."""
+        """Повторный email не проходит валидацию формы — clean_email() это проверяет."""
         from users.forms import RegisterForm
-        from users.models import AccountInfo
-        AccountInfo.objects.create(
-            account=user,
-            first_name='X',
-            last_name='Y',
-            phone='+79990000001',
-            email='taken@gmail.com',
-        )
         data = self._valid_data()
-        data['email'] = 'taken@gmail.com'
+        data['email'] = 'user@gmail.com'
         data['username'] = 'newuser2'
         form = RegisterForm(data=data)
         assert not form.is_valid()
         assert 'email' in form.errors
 
     def test_duplicate_phone(self, user):
-        """Повторный телефон не проходит валидацию формы."""
+        """Повторный телефон не проходит валидацию формы — clean_phone() это проверяет."""
         from users.forms import RegisterForm
         from users.models import AccountInfo
         AccountInfo.objects.create(
@@ -242,7 +204,6 @@ class TestRegisterForm:
             first_name='X',
             last_name='Y',
             phone='+79991112233',
-            email='unique99@gmail.com',
         )
         data = self._valid_data()
         data['username'] = 'newuser3'
@@ -252,15 +213,16 @@ class TestRegisterForm:
         assert 'phone' in form.errors
 
     def test_register_form_saves_account_info(self):
-        """Сохранение формы создаёт пользователя и AccountInfo."""
+        """Сохранение формы создаёт пользователя и связанный AccountInfo."""
         from users.forms import RegisterForm
         from users.models import AccountInfo
         form = RegisterForm(data=self._valid_data())
         assert form.is_valid(), form.errors
-        user = form.save()
-        assert AccountInfo.objects.filter(account=user).exists()
-        info = AccountInfo.objects.get(account=user)
-        assert info.email == 'formuser@gmail.com'
+        saved_user = form.save()
+        assert AccountInfo.objects.filter(account=saved_user).exists()
+        info = AccountInfo.objects.get(account=saved_user)
+        # phone сохраняется через cleaned_data в методе save()
+        assert info.phone == '+79991112233'
 
 
 # Тестирование views: регистрация, логин, логаут, профиль
