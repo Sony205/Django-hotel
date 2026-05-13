@@ -75,6 +75,10 @@ class Booking(models.Model):
         'Дата создания',
         auto_now_add=True,
     )
+    
+    class Meta:
+        verbose_name = 'Бронь'
+        verbose_name_plural = 'Бронирование'
 
     def __str__(self):
         return f'Бронь №{self.id}: {self.client} — {self.room}'
