@@ -48,30 +48,18 @@ class TestValidators:
 class TestCustomUserModel:
     """Тесты модели CustomUser."""
 
-    def test_user_creation(self, django_user_model):
+    def test_user_creation(self, user):
         """Пользователь создаётся корректно."""
-        user = django_user_model.objects.create_user(
-            username='newuser',
-            password='pass12345'
-        )
         assert user.pk is not None
-        assert user.username == 'newuser'
+        assert user.username == 'testuser'
 
-    def test_user_is_not_staff_by_default(self, django_user_model):
+    def test_user_is_not_staff_by_default(self, user):
         """По умолчанию пользователь не является сотрудником."""
-        user = django_user_model.objects.create_user(
-            username='plainuser',
-            password='pass12345'
-        )
         assert user.is_staff is False
 
-    def test_user_str(self, django_user_model):
+    def test_user_str(self, user):
         """__str__ пользователя возвращает username."""
-        user = django_user_model.objects.create_user(
-            username='struser',
-            password='pass12345'
-        )
-        assert str(user) == 'struser'
+        assert str(user) == 'testuser'
 
 
 @pytest.mark.django_db
